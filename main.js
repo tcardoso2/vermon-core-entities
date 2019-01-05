@@ -4,3 +4,4 @@ exports.entities = require('./Entities');
 exports.extensions = require('./Extensions');
 exports.filters = require('./Filters');
 exports.em = require('./EnvironmentManager');
+exports.utils = require('./utils');

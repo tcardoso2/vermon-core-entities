@@ -1,6 +1,6 @@
 {
   "name": "vermon-core-entities",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Entities, Extensions and utils library for the vermon package",
   "main": "main.js",
   "scripts": {
