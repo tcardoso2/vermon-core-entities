@@ -248,7 +248,7 @@ class FileDetector extends MotionDetector {
 class PIRMotionDetector extends MotionDetector {
   constructor (pin, callback) {
     super('PIR Motion detector')
-    this.log = require('./main.js').Log
+    this.log = require('./utils.js').log
     let Gpio
     this.pir = undefined
 
