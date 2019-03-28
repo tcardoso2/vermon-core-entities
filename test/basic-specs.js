@@ -8,7 +8,7 @@ let should = chai.should()
 let fs = require('fs')
 let entities = require('../Entities')
 let em = require('../EnvironmentManager')
-let extentions = require('../Extensions')
+let extensions = require('../Extensions')
 let filters = require('../Filters')
 let main = require('../main')
 

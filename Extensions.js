@@ -14,6 +14,7 @@ let node_cmd = require('node-cmd')
 let moment = require('moment')
 let utils = require('./utils.js')
 let log = utils.log
+let stomp = require('stomp-client')
 
 /**
  * A Simple Command line wrapper, it executes the command mentioned after a change in the Environment
@@ -192,6 +193,38 @@ class MultiEnvironment extends ent.Environment {
    */
   getSubEnvironment (name) {
     return this.currentState[name]
+  }
+}
+
+/* 
+ * A Stomp subscriber.
+ * @param {object} the connection details
+ */
+class StompDetector extends MotionDetector {
+  constructor(details, queue) {
+    let client
+    super('Stomp Detector (Subscriber)')
+    if(!details) {
+      throw new Error('Connection details must be provided as first argument')
+    }
+    if(!queue) {
+      throw new Error('Queue must be provided as second argument')
+    }
+    client = new stomp(details.host, details.port, details.user, details.pass) //'127.0.0.1', 61613, 'user', 'pass'
+    this.getClient = () => client
+    this.getQueue = () => queue
+  }
+  startMonitoring () {
+    super.startMonitoring()
+    let m = this
+    this.getClient().connect(function(sessionId){
+      log.info(`Connected with session ID: ${sessionId}`)
+      m.getClient().subscribe(m.getQueue(), (body, headers) => {
+        console.log(`Consumer received message!: ${body}, headers:`)
+        console.log(headers)
+        m.send({ 'body': body, 'headers': headers}, m)
+      })
+    })
   }
 }
 
@@ -457,11 +490,12 @@ class RaspistillNotifier extends BaseNotifier {
 // Extending Factory methods
 
 // Extending Entities Factory
-const classes = { FileDetector, PIRMotionDetector, PIRMotionDetector, SystemEnvironment, SlackNotifier, RaspistillNotifier, MultiEnvironment }
+const classes = { FileDetector, StompDetector, PIRMotionDetector, PIRMotionDetector, SystemEnvironment, SlackNotifier, RaspistillNotifier, MultiEnvironment }
 
 new ent.EntitiesFactory().extend(classes)
 
 exports.FileDetector = FileDetector
+exports.StompDetector = StompDetector
 exports.PIRMotionDetector = PIRMotionDetector
 exports.IOBrokerDetector = IOBrokerDetector
 exports.SlackNotifier = SlackNotifier

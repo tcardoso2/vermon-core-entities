@@ -1,6 +1,6 @@
 {
   "name": "vermon-core-entities",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Entities, Extensions and utils library for the vermon package",
   "main": "main.js",
   "scripts": {
@@ -15,6 +15,7 @@
     "lodash": "^4.17.11",
     "node-cmd": "^3.0.0",
     "node-slack-upload": "^1.2.1",
+    "stomp-client": "^0.9.0",
     "tracer": "^0.9.8"
   }
 }
