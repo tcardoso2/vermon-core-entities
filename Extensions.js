@@ -520,7 +520,7 @@ class RaspistillNotifier extends BaseNotifier {
 // Extending Factory methods
 
 // Extending Entities Factory
-const classes = { FileDetector, StompDetector, PIRMotionDetector, PIRMotionDetector, SystemEnvironment, SlackNotifier, RaspistillNotifier, MultiEnvironment }
+const classes = { FileDetector, StompDetector, PIRMotionDetector, PIRMotionDetector, SystemEnvironment, SlackNotifier, StompNotifier, RaspistillNotifier, MultiEnvironment }
 
 new ent.EntitiesFactory().extend(classes)
 
