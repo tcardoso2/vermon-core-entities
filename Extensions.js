@@ -251,7 +251,7 @@ class StompNotifier extends BaseNotifier {
     let n = this
     this.getClient().connect(function(sessionId){
       log.info(`${n.name} stomp client connected with session ID: ${sessionId}`)
-      log.info(`Publisher will send message '${text}!', state is (if defined):`)
+      log.info(`Publisher will send message '${text}', state is (if defined):`)
       log.debug(newState)
       n.getClient().publish(n.getQueue(), newState ? { 'text': text, 'newState': newState } : text)
     })
