@@ -218,12 +218,42 @@ class StompDetector extends MotionDetector {
     super.startMonitoring()
     let m = this
     this.getClient().connect(function(sessionId){
-      log.info(`Connected with session ID: ${sessionId}`)
+      log.info(`${m.name} stomp client connected with session ID: ${sessionId}`)
       m.getClient().subscribe(m.getQueue(), (body, headers) => {
-        console.log(`Consumer received message!: ${body}, headers:`)
-        console.log(headers)
+        log.info(`Consumer received message!: '${body}', headers:`)
+        log.debug(headers)
         m.send({ 'body': body, 'headers': headers}, m)
       })
+    })
+  }
+}
+
+/* 
+ * A Stomp publisher.
+ * @param {object} the connection details
+ */
+class StompNotifier extends BaseNotifier {
+  constructor(details, queue) {
+    let client
+    super('Stomp Notifier (Publisher)')
+    if(!details) {
+      throw new Error('Connection details must be provided as first argument')
+    }
+    if(!queue) {
+      throw new Error('Queue must be provided as second argument')
+    }
+    client = new stomp(details.host, details.port, details.user, details.pass) //'127.0.0.1', 61613, 'user', 'pass'
+    this.getClient = () => client
+    this.getQueue = () => queue
+  }
+  notify (text, oldState, newState, environment, detector) {
+    super.notify(text, oldState, newState, environment, detector)
+    let n = this
+    this.getClient().connect(function(sessionId){
+      log.info(`${n.name} stomp client connected with session ID: ${sessionId}`)
+      log.info(`Publisher will send message '${text}!', state is (if defined):`)
+      log.debug(newState)
+      n.getClient().publish(n.getQueue(), newState ? { 'text': text, 'newState': newState } : text)
     })
   }
 }
@@ -499,6 +529,7 @@ exports.StompDetector = StompDetector
 exports.PIRMotionDetector = PIRMotionDetector
 exports.IOBrokerDetector = IOBrokerDetector
 exports.SlackNotifier = SlackNotifier
+exports.StompNotifier = StompNotifier
 exports.RaspistillNotifier = RaspistillNotifier
 exports.SystemEnvironment = SystemEnvironment
 exports.MultiEnvironment = MultiEnvironment
