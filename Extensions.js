@@ -47,12 +47,16 @@ class SystemEnvironment extends ent.Environment {
         m.addChange(m.currentState)
       })
     }
-    if (this.interval != 0) {
+    if (this.interval > 0) {
       log.info(`Setting interval function to run every ${this.interval} ms...`)
       this.i = setInterval(f, this.interval < 500 ? 500 : this.interval) // interval is never below 500 millisecond for performance reasons
     } else {
-      log.info('No interval was set. Executing function f() directly')
-      f()
+      if (this.interval < 0) {
+        log.info('Negative Interval, will not execute the command ever.')
+      } else {
+        log.info('No interval was set. Executing function f() directly')
+        f()        
+      }
     }
   }
 
