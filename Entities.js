@@ -655,7 +655,8 @@ class EntitiesFactory {
  * TODO: Needs documentation
  */
   extend (newClasses) {
-    log.info('Extending classes...')
+    log.info('Extending classes, new classes are...')
+    log.info(newClasses)
     for (let prop in newClasses) {
       log.debug(`  ${prop}`)
       classes[prop] = newClasses[prop]
