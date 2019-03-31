@@ -251,15 +251,24 @@ class StompNotifier extends BaseNotifier {
     this.getQueue = () => queue
     let n = this
     client.connect(function(sessionId){
+      log.info(`${this.name} stomp client connected with session ID: ${this.sessionId}`)
       n.sessionId = sessionId;
     })
   }
   notify (text, oldState, newState, environment, detector) {
     super.notify(text, oldState, newState, environment, detector)
-    log.info(`${this.name} stomp client connected with session ID: ${this.sessionId}`)
-    log.info(`Publisher will send message '${text}', state is (if defined):`)
-    log.debug(newState)
-    this.getClient().publish(this.getQueue(), newState ? { 'text': text, 'newState': newState } : text)
+    if (!this.sessionId){
+      log.warn('ATTENTION! No session Id exists, Stomp Notifier is still waiting to get a session!')
+    } else {
+      log.info(`Publisher will send message '${text}', state is (if defined):`)
+      log.debug(newState)
+      try{
+        this.getClient().publish(this.getQueue(), newState ? { 'text': text, 'newState': newState } : text)
+      } catch(e) {
+        log.info(`Error sending notification to queue`)
+        log.error(e)
+      }      
+    }
   }
 }
 
