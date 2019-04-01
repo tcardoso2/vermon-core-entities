@@ -263,7 +263,7 @@ class StompNotifier extends BaseNotifier {
       log.info(`Publisher will send message '${text}', state is (if defined):`)
       log.debug(newState)
       try{
-        this.getClient().publish(this.getQueue(), newState ? { 'text': text, 'newState': newState } : text)
+        this.getClient().publish(this.getQueue(), newState ? JSON.stringify({ 'text': text, 'newState': newState }) : text)
       } catch(e) {
         log.info(`Error sending notification to queue`)
         log.error(e)
