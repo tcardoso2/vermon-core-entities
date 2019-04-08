@@ -272,6 +272,40 @@ class StompNotifier extends BaseNotifier {
   }
 }
 
+/* 
+ * A Request-Reply Worker (special type of Notifier).
+ * @param {object} 
+ */
+class RequestReplyWorker extends StompNotifier {
+  constructor(details, queue, script) {
+    super(details, queue)
+    if(!script) {
+      throw new Error('Script must be provided as third argument')
+    }
+    this.script_ref = require(`${__dirname}/${script}`)
+    this.run = (args) => this.script_ref(args)
+  }
+  notify (text, oldState, newState, environment, detector) {
+    let result
+    try{
+      result = this.run({ "text": text, 
+        "oldState": oldState, 
+        "newState": newState, 
+        "environment": environment, 
+        "detector": detector })
+    } catch (e) {
+      result.text = e.message
+      result.newState = e
+    }
+    console.log("$$$%^^^^^&&&", result)
+    super.notify(result.text ? result.text : text, 
+      oldState, 
+      result.newState ? result.newState : result, 
+      environment, 
+      detector)
+  }
+}
+
 // A concrete MotionDetector for detecting files in a folder
 class FileDetector extends MotionDetector {
   constructor (name, filePath, sendOld = false) {
@@ -534,7 +568,7 @@ class RaspistillNotifier extends BaseNotifier {
 // Extending Factory methods
 
 // Extending Entities Factory
-const classes = { FileDetector, StompDetector, PIRMotionDetector, PIRMotionDetector, SystemEnvironment, SlackNotifier, StompNotifier, RaspistillNotifier, MultiEnvironment }
+const classes = { FileDetector, StompDetector, PIRMotionDetector, PIRMotionDetector, SystemEnvironment, SlackNotifier, StompNotifier, RequestReplyWorker, RaspistillNotifier, MultiEnvironment }
 
 new ent.EntitiesFactory().extend(classes)
 
@@ -544,6 +578,7 @@ exports.PIRMotionDetector = PIRMotionDetector
 exports.IOBrokerDetector = IOBrokerDetector
 exports.SlackNotifier = SlackNotifier
 exports.StompNotifier = StompNotifier
+exports.RequestReplyWorker = RequestReplyWorker
 exports.RaspistillNotifier = RaspistillNotifier
 exports.SystemEnvironment = SystemEnvironment
 exports.MultiEnvironment = MultiEnvironment

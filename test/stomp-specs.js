@@ -36,7 +36,7 @@ describe('Stomp Detector (Stomp client subscriber) tests, ', function () {
   it('should require connection arguments as mandatory argument', function (done) {
     // Prepare
     try{
-	  new extensions.StompDetector()
+	    new extensions.StompDetector()
     } catch (e) {
       e.message.should.equal("Connection details must be provided as first argument")
       done()
@@ -59,7 +59,7 @@ describe('Stomp Detector (Stomp client subscriber) tests, ', function () {
 })
 
 describe('Stomp Notifier (Stomp client publisher) tests, ', function () {
-  it('should inherit the MotionDetector class', function (done) {
+  it('should inherit the BaseNotifier class', function (done) {
     // Prepare
     (new extensions.StompNotifier({}, 'queue1') instanceof entities.BaseNotifier).should.equal(true)
     done()
