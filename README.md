@@ -2,6 +2,7 @@
 Entities, Extensions, Filters used in sermon
 
 * 0.5.12 * (Planned), to add a vermon web example with simple html sending message, and backend subscriber receiving it;  
+* 0.5.12 * Finished implementation of RequestReplyWorker;  
 * 0.5.11 * Started RequestReplyWorker (Notifier), WIP;  
 * 0.5.10 * Fixed Stomp Notifier bug, JSON object needed to be stringified before putting in queue;  
 * 0.5.9 * Fixed Notifier bug which was attempting to send a message to queue before creating a connection;  

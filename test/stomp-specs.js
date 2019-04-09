@@ -76,14 +76,14 @@ describe('Stomp Notifier (Stomp client publisher) tests, ', function () {
   })
   it('should publish to queue changes', function (done) {
   	this.timeout(4000)
-	let sub = new extensions.StompDetector({ host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, '/queue/queue2')
+	let sub = new extensions.StompDetector({ host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, '/queue/queue123')
 	sub.startMonitoring()
 	sub.on('hasDetected', (intensity, newState, source) => {
 	  console.log(`Received message: `, newState.body)
-	  newState.body.should.eql('Hello World!')
+	  newState.body.should.eql("Hello World!")
 	  done()
 	})
-	let pub = new extensions.StompNotifier({ host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, '/queue/queue2')
+	let pub = new extensions.StompNotifier({ host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, '/queue/queue123')
 	setTimeout(() => {
   	  pub.notify("Hello World!")
 	}, 1000)

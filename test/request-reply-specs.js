@@ -50,6 +50,24 @@ describe('Request-Reply Worker Notifier tests, ', function () {
     }    
   })
   it('should pass in the detected change to the script', function (done) {
+    this.timeout(4000)
+    let sub = new extensions.StompDetector({ host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, '/queue/queue2')
+    sub.startMonitoring()
+    let worker = new extensions.RequestReplyWorker(
+      { host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, 
+      '/queue/queue2reply',
+      'test/script2')
+    worker.bindToDetector(sub)
+    worker.on('pushedNotification', (name, text, data) => {
+      data.newState.should.be.eql({response_from_script : { message: "Pass this message to the script!" }})
+      done()
+    })
+    let pub = new extensions.StompNotifier({ host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, '/queue/queue2')
+    setTimeout(() => {
+      pub.notify({ message: "Pass this message to the script!" })
+    }, 1000)
+  })
+  it('when the script finishes should send result back to the reply-queue', function (done) {
   	this.timeout(4000)
   	let worker = new extensions.RequestReplyWorker(
       { host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, 
@@ -64,20 +82,22 @@ describe('Request-Reply Worker Notifier tests, ', function () {
     })
     setTimeout(() => worker.notify(), 1000)
   })
-  xit('when the script finishes should send result back to the reply-queue', function (done) {
+  it('If an exception happens during script runtime, will send the error back to the reply queue', function (done) {
     this.timeout(4000)
-    let sub = new extensions.StompDetector({ host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, '/queue/queue2')
+    let sub = new extensions.StompDetector({ host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, '/queue/queue3')
     sub.startMonitoring()
-    sub.on('hasDetected', (intensity, newState, source) => {
-      console.log(`Received message: `, newState.body)
-      newState.body.should.eql('Hello World!')
+    let worker = new extensions.RequestReplyWorker(
+      { host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, 
+      '/queue/queue3reply',
+      'test/script3_error')
+    worker.bindToDetector(sub)
+    worker.on('pushedNotification', (name, text, data) => {
+      (data.newState instanceof ReferenceError).should.eql(true)
       done()
     })
-    let pub = new extensions.StompNotifier({ host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, '/queue/queue2')
+    let pub = new extensions.StompNotifier({ host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, '/queue/queue3')
     setTimeout(() => {
-        pub.notify("Hello World!")
+      pub.notify({ message: "Pass this message to the script!" })
     }, 1000)
-  })
-  xit('If an exception happens during script runtime, will send the error back to the reply queue', function (done) {
   })  
 })

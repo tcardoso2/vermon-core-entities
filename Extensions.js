@@ -263,7 +263,7 @@ class StompNotifier extends BaseNotifier {
       log.info(`Publisher will send message '${text}', state is (if defined):`)
       log.debug(newState)
       try{
-        this.getClient().publish(this.getQueue(), newState ? JSON.stringify({ 'text': text, 'newState': newState }) : text)
+        this.getClient().publish(this.getQueue(), newState ? JSON.stringify({ 'text': text, 'newState': newState }) : (text instanceof Object ? JSON.stringify(text) : text))
       } catch(e) {
         log.info(`Error sending notification to queue`)
         log.error(e)
@@ -274,7 +274,11 @@ class StompNotifier extends BaseNotifier {
 
 /* 
  * A Request-Reply Worker (special type of Notifier).
- * @param {object} 
+ * It Executes a node script, and returns the resutl as
+ * a notification and directly into a queue
+ * @param {object} details, are the details of the queue, see StompNotifier
+ * @param {string} queue, the queue name 
+ * @param {string} script, the script file full path
  */
 class RequestReplyWorker extends StompNotifier {
   constructor(details, queue, script) {
@@ -286,18 +290,19 @@ class RequestReplyWorker extends StompNotifier {
     this.run = (args) => this.script_ref(args)
   }
   notify (text, oldState, newState, environment, detector) {
-    let result
-    try{
-      result = this.run({ "text": text, 
+    let result = { "text": text, 
         "oldState": oldState, 
         "newState": newState, 
         "environment": environment, 
-        "detector": detector })
+        "detector": detector,
+        "hasError": false }
+    try{
+      result = this.run(result)
     } catch (e) {
-      result.text = e.message
+      result.hasError = true
+      result.text = e.message 
       result.newState = e
     }
-    console.log("$$$%^^^^^&&&", result)
     super.notify(result.text ? result.text : text, 
       oldState, 
       result.newState ? result.newState : result, 
