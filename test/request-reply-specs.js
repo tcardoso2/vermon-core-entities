@@ -28,7 +28,7 @@ after(function (done) {
 describe('Request-Reply Worker Notifier tests, ', function () {
   it('should inherit the StompNotifier class', function (done) {
     // Prepare
-    (new extensions.RequestReplyWorker({}, 'queue1reply', 'test/script1') instanceof extensions.StompNotifier).should.equal(true)
+    (new extensions.RequestReplyWorker({}, 'queue1reply', __dirname + '/script1') instanceof extensions.StompNotifier).should.equal(true)
     done()
   })
   it('should require a script', function (done) {
@@ -42,7 +42,7 @@ describe('Request-Reply Worker Notifier tests, ', function () {
   })
   it('The script should export a single function', function (done) {
     try{
-      new extensions.RequestReplyWorker({}, 'queue1reply', 'test/script12')
+      new extensions.RequestReplyWorker({}, 'queue1reply', __dirname + '/script12')
     } catch (e) {
       e.message.should.equal(`Cannot find module '${__dirname}/script12'`)
       done()
@@ -51,14 +51,15 @@ describe('Request-Reply Worker Notifier tests, ', function () {
   })
   it('should pass in the detected change to the script', function (done) {
     this.timeout(4000)
-    let sub = new extensions.StompDetector({ host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, '/queue/queue2')
+    let sub = new extensions.StompDetector({ host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, '/queue/queue2', true)
     sub.startMonitoring()
     let worker = new extensions.RequestReplyWorker(
       { host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, 
       '/queue/queue2reply',
-      'test/script2')
-    worker.bindToDetector(sub)
+      __dirname + '/script2')
+    worker.bindToDetector(sub)  
     worker.on('pushedNotification', (name, text, data) => {
+      console.log(data.newState)
       data.newState.should.be.eql({response_from_script : { message: "Pass this message to the script!" }})
       done()
     })
@@ -72,24 +73,24 @@ describe('Request-Reply Worker Notifier tests, ', function () {
   	let worker = new extensions.RequestReplyWorker(
       { host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, 
       '/queue/queue1reply',
-      'test/script1')
+      __dirname + '/script1')
     let sub = new extensions.StompDetector({ host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, '/queue/queue1reply')
     sub.startMonitoring()
-    sub.on('hasDetected', (intensity, newState, source) => {
+    sub.on('hasSkipped', (intensity, newState, source) => {
       console.log(`Received message: `, newState.body)
-      JSON.parse(newState.body).should.eql({newState:'Hello Request-Reply!!!'})
+      newState.body.should.eql({newState:'Hello Request-Reply!!!'})
       done()
     })
     setTimeout(() => worker.notify(), 1000)
   })
   it('If an exception happens during script runtime, will send the error back to the reply queue', function (done) {
     this.timeout(4000)
-    let sub = new extensions.StompDetector({ host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, '/queue/queue3')
+    let sub = new extensions.StompDetector({ host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, '/queue/queue3', true)
     sub.startMonitoring()
     let worker = new extensions.RequestReplyWorker(
       { host: '127.0.0.1', port: 61613, user: 'admin', pass: 'admin'}, 
       '/queue/queue3reply',
-      'test/script3_error')
+      __dirname + '/script3_error')
     worker.bindToDetector(sub)
     worker.on('pushedNotification', (name, text, data) => {
       (data.newState instanceof ReferenceError).should.eql(true)

@@ -1,7 +1,8 @@
 # vermon-core-entities
 Entities, Extensions, Filters used in sermon
 
-* 0.5.12 * (Planned), to add a vermon web example with simple html sending message, and backend subscriber receiving it;  
+* 0.5.14 * (Planned), MQTTNotifier and MQTTDetector;  
+* 0.5.13 * (WIP) Bug fixes RequestReplyWorker should take a full path script, StompDetector should not propagate by default (new internal Detector event 'hasSkipped'); started creating documentation; created a new Filter, ObjectKeyValueFilter, where you specify the Key/Value to filter on the newState;  
 * 0.5.12 * Finished implementation of RequestReplyWorker;  
 * 0.5.11 * Started RequestReplyWorker (Notifier), WIP;  
 * 0.5.10 * Fixed Stomp Notifier bug, JSON object needed to be stringified before putting in queue;  

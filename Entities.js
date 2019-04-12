@@ -239,7 +239,7 @@ class MotionDetector {
    * Sends a signal to a Notifier if the Motion Detector is active and if there are no Filters which filter out that value
    * @returns {Boolean} true if the Motion Detector is active.
    */
-  send (newState, source) {
+  send (newState, source, dontPropagate = false) {
     // Does not do anything with the env. Maybe deprecate it?
     if (this._isActive) {
       this.count++
@@ -253,7 +253,11 @@ class MotionDetector {
           return
         }
       }
-      this.emit('hasDetected', this.currentIntensity, newState, source, this)
+      if(!dontPropagate) {
+        this.emit('hasDetected', this.currentIntensity, newState, source, this)
+      } else {
+        this.emit('hasSkipped', this.currentIntensity, newState, source, this)        
+      }
       this.currentIntensity = newState
     }
   }

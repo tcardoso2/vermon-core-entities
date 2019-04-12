@@ -155,8 +155,28 @@ class SystemEnvironmentFilter extends BaseFilter {
   }
 }
 
+//Filters Objects which val.key matches val.val
+//val.key is an array of key and sub-keys, e.g. object.key1.key2 is expressed as val.key = ['key1','key2']
+class ObjectKeyValueFilter extends BaseFilter {
+  constructor (val, applyTo) {
+    super(val, applyTo)
+  }
+
+  // Simply returns nothing (opposite of it's base class)
+  filter (newState, env, detector) {
+    let val = newState
+    for(let k in this.valueToFilter.key) {
+      val = val[this.valueToFilter.key[k]]
+      if(val === undefined) return newState
+    }
+    return val == this.valueToFilter.val ? false : newState
+  }
+}
+
+
+
 exports.classes = {
-  BaseFilter, BlockAllFilter, ValueFilter, NameFilter, LowPassFilter, HighPassFilter, SystemEnvironmentFilter
+  BaseFilter, BlockAllFilter, ValueFilter, NameFilter, LowPassFilter, HighPassFilter, ObjectKeyValueFilter, SystemEnvironmentFilter
 }
 
 exports.BaseFilter = BaseFilter
@@ -165,4 +185,5 @@ exports.HighPassFilter = HighPassFilter
 exports.LowPassFilter = LowPassFilter
 exports.NameFilter = NameFilter
 exports.ValueFilter = ValueFilter
+exports.ObjectKeyValueFilter = ObjectKeyValueFilter
 exports.SystemEnvironmentFilter = SystemEnvironmentFilter

@@ -15,6 +15,7 @@ let moment = require('moment')
 let utils = require('./utils.js')
 let log = utils.log
 let stomp = require('stomp-client')
+var validator = require('validator')
 
 /**
  * A Simple Command line wrapper, it executes the command mentioned after a change in the Environment
@@ -203,9 +204,13 @@ class MultiEnvironment extends ent.Environment {
 /* 
  * A Stomp subscriber.
  * @param {object} the connection details
+ * @param {string} the queue name
+ * @param {bool} propagate, will default to false, meaning will not propagate to notifiers unless explicitely told to.
+ *               This is to avoid the risk of infinite loops if you have Datectors and Notifiers mutually triggering one
+ *               another
  */
 class StompDetector extends MotionDetector {
-  constructor(details, queue) {
+  constructor(details, queue, propagate = false) { //Danger! be very careful before putting propagate = true
     let client
     super('Stomp Detector (Subscriber)')
     if(!details) {
@@ -217,6 +222,7 @@ class StompDetector extends MotionDetector {
     client = new stomp(details.host, details.port, details.user, details.pass) //'127.0.0.1', 61613, 'user', 'pass'
     this.getClient = () => client
     this.getQueue = () => queue
+    this.isPropagating = () => propagate
   }
   startMonitoring () {
     super.startMonitoring()
@@ -226,7 +232,10 @@ class StompDetector extends MotionDetector {
       m.getClient().subscribe(m.getQueue(), (body, headers) => {
         log.info(`Consumer received message!: '${body}', headers:`)
         log.debug(headers)
-        m.send({ 'body': body, 'headers': headers}, m)
+        if(!m.isPropagating()) {
+          log.warn(`Consumer will not propagate message to Notifiers to avoid risk of infinite loop`)
+        }
+        m.send({ 'body': validator.isJSON(body) ? JSON.parse(body) : body, 'headers': headers}, m, !m.isPropagating())
       })
     })
   }
@@ -278,7 +287,7 @@ class StompNotifier extends BaseNotifier {
  * a notification and directly into a queue
  * @param {object} details, are the details of the queue, see StompNotifier
  * @param {string} queue, the queue name 
- * @param {string} script, the script file full path
+ * @param {string} script, the script file FULL path
  */
 class RequestReplyWorker extends StompNotifier {
   constructor(details, queue, script) {
@@ -286,7 +295,9 @@ class RequestReplyWorker extends StompNotifier {
     if(!script) {
       throw new Error('Script must be provided as third argument')
     }
-    this.script_ref = require(`${__dirname}/${script}`)
+    log.info(`Will attempt to import script: "${script}"`)
+    this.script_ref = require(script.trim())
+    //this.script_ref = require(`${__dirname}/${script}`)
     this.run = (args) => this.script_ref(args)
   }
   notify (text, oldState, newState, environment, detector) {
