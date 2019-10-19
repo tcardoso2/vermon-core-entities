@@ -16,6 +16,7 @@ let utils = require('./utils.js')
 let log = utils.log
 let stomp = require('stomp-client')
 var validator = require('validator')
+let reverseRef = require('./main')
 
 /**
  * A Simple Command line wrapper, it executes the command mentioned after a change in the Environment
@@ -66,21 +67,70 @@ class SystemEnvironment extends ent.Environment {
     node_cmd.get(
       m.command,
       function (err, data, stderr) {
-        m.currentState = {
+	m.currentState = {
           stdout: { 'err': err, 'data': data, 'stderr': stderr },
           cpus: os.cpus(),
           totalmem: os.totalmem(),
           freemem: os.freemem(),
           timestamp: new Date()
         }
-        callback(m)
+        m.postCmd(callback)
       }
     )
+  }
+
+  postCmd(callback) {
+    callback(this) 
   }
 
   exit () {
     super.exit()
     clearInterval(this.i)
+  }
+}
+/*
+ * Dependencies: requires nmap to be installed in the system
+ */
+
+class NodeEnvironment extends SystemEnvironment {
+  constructor (interval = 0, killAfter = 0, createDetectors = true) {
+    super('nmap -sn 192.168.0.0/24', interval, killAfter)
+    this.createDetectors = () => createDetectors
+  }
+
+  postCmd(callback) {
+    //Post-processes the response
+    this.currentState.stdout.data = this.currentState.stdout.data.split("\n")
+    if (this.createDetectors()) {
+      this.sanitizeNmapOutput()
+      this.convertNmapSanitizedToDetectors()
+      console.log(this.currentState.stdout.data)
+    }
+    super.postCmd(callback)
+  }
+  
+  sanitizeNmapOutput(filterFor = 'Nmap scan report for ') {
+    let response = []
+    this.currentState.stdout.data.forEach((item) => {
+      if (item != '') {
+        if (item.startsWith(filterFor)) {
+	  response.push(item.replace(filterFor, ''))
+	}
+      }
+    })
+    this.currentState.stdout.data = response
+  }
+
+  convertNmapSanitizedToDetectors() {
+    this.currentState.stdout.data.forEach((item) => {
+      reverseRef.vermon().addDetector(new NodeDetector(item, item))
+    }) 
+  }
+}
+
+class NodeDetector extends ent.MotionDetector {
+  constructor(name, intensity) {
+    super(name, intensity)
   }
 }
 
@@ -584,7 +634,7 @@ class RaspistillNotifier extends BaseNotifier {
 // Extending Factory methods
 
 // Extending Entities Factory
-const classes = { FileDetector, StompDetector, PIRMotionDetector, PIRMotionDetector, SystemEnvironment, SlackNotifier, StompNotifier, RequestReplyWorker, RaspistillNotifier, MultiEnvironment }
+const classes = { FileDetector, StompDetector, PIRMotionDetector, PIRMotionDetector, NodeDetector, SystemEnvironment, NodeEnvironment, SlackNotifier, StompNotifier, RequestReplyWorker, RaspistillNotifier, MultiEnvironment }
 
 new ent.EntitiesFactory().extend(classes)
 
@@ -597,4 +647,5 @@ exports.StompNotifier = StompNotifier
 exports.RequestReplyWorker = RequestReplyWorker
 exports.RaspistillNotifier = RaspistillNotifier
 exports.SystemEnvironment = SystemEnvironment
+exports.NodeEnvironment = NodeEnvironment
 exports.MultiEnvironment = MultiEnvironment

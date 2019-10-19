@@ -8,6 +8,7 @@ let ko = require('knockout')
 let utils = require('./utils.js')
 let log = utils.log
 let em = require('./EnvironmentManager.js')
+let reverseRef = require('./main')
 
 /**
  * @class: Entities.Environment

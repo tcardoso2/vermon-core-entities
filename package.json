@@ -1,6 +1,6 @@
 {
   "name": "vermon-core-entities",
-  "version": "0.5.13",
+  "version": "0.5.15",
   "description": "Entities, Extensions and utils library for the vermon package",
   "main": "main.js",
   "scripts": {
@@ -9,12 +9,17 @@
   "author": "Tiago Cardoso <tcardoso@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
     "chokidar": "^2.0.4",
     "flatted": "^2.0.0",
     "knockout": "^3.4.2",
     "lodash": "^4.17.11",
+    "moment": "^2.24.0",
     "node-cmd": "^3.0.0",
+    "node-raspistill": "0.0.19",
     "node-slack-upload": "^1.2.1",
+    "slack-node": "^0.1.8",
     "stomp-client": "^0.9.0",
     "tracer": "^0.9.8",
     "validator": "^10.11.0"
