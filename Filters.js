@@ -89,7 +89,6 @@ class NameFilter extends BaseFilter {
     super(val, applyTo)
   }
 
-  // Simply returns nothing (opposite of it's base class)
   filter (newState, env, detector) {
     return detector.name == this.valueToFilter ? false : newState
   }
@@ -100,7 +99,6 @@ class ValueFilter extends BaseFilter {
     super(val, applyTo)
   }
 
-  // Simply returns nothing (opposite of it's base class)
   filter (newState, env, detector) {
     return newState == this.valueToFilter ? false : newState
   }
@@ -111,7 +109,6 @@ class HighPassFilter extends BaseFilter {
     super(val, applyTo)
   }
 
-  // Simply returns nothing (opposite of it's base class)
   filter (newState, env, detector) {
     return newState < this.valueToFilter ? false : newState
   }
@@ -122,7 +119,6 @@ class LowPassFilter extends BaseFilter {
     super(val, applyTo)
   }
 
-  // Simply returns nothing (opposite of it's base class)
   filter (newState, env, detector) {
     return newState > this.valueToFilter ? false : newState
   }
@@ -162,7 +158,6 @@ class ObjectKeyValueFilter extends BaseFilter {
     super(val, applyTo)
   }
 
-  // Simply returns nothing (opposite of it's base class)
   filter (newState, env, detector) {
     let val = newState
     for(let k in this.valueToFilter.key) {
@@ -173,10 +168,21 @@ class ObjectKeyValueFilter extends BaseFilter {
   }
 }
 
+//Filters Objects which val.key matches val.val
+//val.key is an array of key and sub-keys, e.g. object.key1.key2 is expressed as val.key = ['key1','key2']
+class ObjectKeyFilter extends BaseFilter {
+  constructor (val, applyTo) {
+    super(val, applyTo)
+  }
 
+  filter (newState, env, detector) {
+    let val = newState.stdout.data[this.valueToFilter]
+    return val ? false : val
+  }
+}
 
 exports.classes = {
-  BaseFilter, BlockAllFilter, ValueFilter, NameFilter, LowPassFilter, HighPassFilter, ObjectKeyValueFilter, SystemEnvironmentFilter
+  BaseFilter, BlockAllFilter, ValueFilter, NameFilter, LowPassFilter, HighPassFilter, ObjectKeyFilter, ObjectKeyValueFilter, SystemEnvironmentFilter
 }
 
 exports.BaseFilter = BaseFilter
@@ -185,5 +191,6 @@ exports.HighPassFilter = HighPassFilter
 exports.LowPassFilter = LowPassFilter
 exports.NameFilter = NameFilter
 exports.ValueFilter = ValueFilter
+exports.ObjectKeyFilter = ObjectKeyFilter
 exports.ObjectKeyValueFilter = ObjectKeyValueFilter
 exports.SystemEnvironmentFilter = SystemEnvironmentFilter

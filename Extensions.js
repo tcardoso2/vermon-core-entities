@@ -1,6 +1,7 @@
 // Extensions which use the Base entities
 // Collaborator: MotionDetector
 let ent = require('./Entities.js')
+let filters = require('./Filters.js')
 let MotionDetector = ent.MotionDetector
 let BaseNotifier = ent.BaseNotifier
 var Slack = require('slack-node')
@@ -67,7 +68,7 @@ class SystemEnvironment extends ent.Environment {
     node_cmd.get(
       m.command,
       function (err, data, stderr) {
-	m.currentState = {
+	      m.currentState = {
           stdout: { 'err': err, 'data': data, 'stderr': stderr },
           cpus: os.cpus(),
           totalmem: os.totalmem(),
@@ -104,27 +105,46 @@ class NodeEnvironment extends SystemEnvironment {
     if (this.createDetectors()) {
       this.sanitizeNmapOutput()
       this.convertNmapSanitizedToDetectors()
-      console.log(this.currentState.stdout.data)
+      //console.log(this.currentState.stdout.data)
     }
     super.postCmd(callback)
   }
   
   sanitizeNmapOutput(filterFor = 'Nmap scan report for ') {
-    let response = []
+    let response = {}
+    let responseItem
     this.currentState.stdout.data.forEach((item) => {
       if (item != '') {
         if (item.startsWith(filterFor)) {
-	  response.push(item.replace(filterFor, ''))
-	}
+          responseItem = {
+            ip: item.replace(filterFor, ''),
+            up: undefined,
+            mac: undefined
+          }
+	      }
+        if (item.startsWith("Host")) {
+          responseItem.up = item
+        }
+        if (item.startsWith("MAC")) {
+          responseItem.mac = item
+          response[responseItem.ip] = responseItem
+        }
       }
     })
     this.currentState.stdout.data = response
   }
 
   convertNmapSanitizedToDetectors() {
-    this.currentState.stdout.data.forEach((item) => {
-      reverseRef.vermon().addDetector(new NodeDetector(item, item))
-    }) 
+    let _detector
+    Object.keys(this.currentState.stdout.data).forEach((key) => {
+      log.info(`Found node ${key}. Adding as a Detector...`)
+      if(!reverseRef.vermon().hasDetector(key)) {
+        _detector = new NodeDetector(key, this.currentState.stdout.data[key])
+        _detector.applyFilter(new filters.ObjectKeyFilter(key, key))
+        reverseRef.vermon().addDetector(_detector)
+      }
+    })
+    log.info(`Number of detectors after adding nodes: ${reverseRef.vermon().getDetectors().length}`)
   }
 }
 

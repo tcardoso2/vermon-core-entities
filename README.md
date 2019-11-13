@@ -1,6 +1,7 @@
 # vermon-core-entities
 Entities, Extensions, Filters used in sermon
 
+* 0.5.16 * Better structuring of NodeDetector, (ip, uptime, mac address...);  
 * 0.5.15 * Added NodeEnvironment and NodeDetetor;  
 * 0.5.14 * (Planned), MQTTNotifier and MQTTDetector;  
 * 0.5.13 * (WIP) Bug fixes RequestReplyWorker should take a full path script, StompDetector should not propagate by default (new internal Detector event 'hasSkipped'); started creating documentation; created a new Filter, ObjectKeyValueFilter, where you specify the Key/Value to filter on the newState;  
