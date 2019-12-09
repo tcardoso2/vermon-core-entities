@@ -168,8 +168,8 @@ class ObjectKeyValueFilter extends BaseFilter {
   }
 }
 
-//Filters Objects which val.key matches val.val
-//val.key is an array of key and sub-keys, e.g. object.key1.key2 is expressed as val.key = ['key1','key2']
+//Gets from the Dictionary the specific object matching the key
+//this.valueToFilter
 class ObjectKeyFilter extends BaseFilter {
   constructor (val, applyTo) {
     super(val, applyTo)
