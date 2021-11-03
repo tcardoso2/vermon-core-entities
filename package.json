@@ -22,6 +22,6 @@
     "slack-node": "^0.1.8",
     "stomp-client": "^0.9.0",
     "tracer": "^0.9.8",
-    "validator": "^10.11.0"
+    "validator": "^13.7.0"
   }
 }
