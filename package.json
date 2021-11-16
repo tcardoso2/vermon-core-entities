@@ -1,6 +1,6 @@
 {
   "name": "vermon-core-entities",
-  "version": "0.5.16",
+  "version": "0.5.17",
   "description": "Entities, Extensions and utils library for the vermon package",
   "main": "main.js",
   "scripts": {
@@ -13,8 +13,8 @@
     "chai-as-promised": "^7.1.1",
     "chokidar": "^2.0.4",
     "flatted": "^2.0.0",
-    "knockout": "^3.4.2",
-    "lodash": "^4.17.11",
+    "knockout": "^3.5.1",
+    "lodash": "^4.17.21",
     "moment": "^2.24.0",
     "node-cmd": "^3.0.0",
     "node-raspistill": "0.0.19",

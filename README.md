@@ -1,6 +1,7 @@
 # vermon-core-entities
 Entities, Extensions, Filters used in sermon
 
+* 0.5.17 * NPM audit fix; 
 * 0.5.16 * Better structuring of NodeDetector, (ip, uptime, mac address...);  
 * 0.5.15 * Added NodeEnvironment and NodeDetetor;  
 * 0.5.14 * (Planned), MQTTNotifier and MQTTDetector;  
